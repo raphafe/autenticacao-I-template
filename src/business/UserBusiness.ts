@@ -1,113 +1,92 @@
 import { UserDatabase } from "../database/UserDatabase"
-import { GetUsersInput, GetUsersOutput, LoginInput, LoginOutput, SignupInput, SignupOutput } from "../dtos/UserDTO"
+import { GetUsersInputDTO, GetUsersOutputDTO } from "../dtos/user/getUsers.dto"
+import { LoginInputDTO, LoginOutputDTO } from "../dtos/user/login.dto"
+import { SignupInputDTO, SignupOutputDTO } from "../dtos/user/signup.dto"
 import { BadRequestError } from "../errors/BadRequestError"
 import { NotFoundError } from "../errors/NotFoundError"
-import { User } from "../models/User"
-import { USER_ROLES } from "../types"
+import { USER_ROLES, User } from "../models/User"
 
 export class UserBusiness {
-    constructor(
-        private userDatabase: UserDatabase
-    ) {}
+  constructor(
+    private userDatabase: UserDatabase
+  ) { }
 
-    public getUsers = async (input: GetUsersInput): Promise<GetUsersOutput> => {
-        const { q } = input
+  public getUsers = async (
+    input: GetUsersInputDTO
+  ): Promise<GetUsersOutputDTO> => {
+    const { q } = input
 
-        if (typeof q !== "string" && q !== undefined) {
-            throw new BadRequestError("'q' deve ser string ou undefined")
-        }
+    const usersDB = await this.userDatabase.findUsers(q)
 
-        const usersDB = await this.userDatabase.findUsers(q)
+    const users = usersDB.map((userDB) => {
+      const user = new User(
+        userDB.id,
+        userDB.name,
+        userDB.email,
+        userDB.password,
+        userDB.role,
+        userDB.created_at
+      )
 
-        const users = usersDB.map((userDB) => {
-            const user = new User(
-                userDB.id,
-                userDB.name,
-                userDB.email,
-                userDB.password,
-                userDB.role,
-                userDB.created_at
-            )
+      return user.toBusinessModel()
+    })
 
-            return user.toBusinessModel()
-        })
+    const output: GetUsersOutputDTO = users
 
-        const output: GetUsersOutput = users
+    return output
+  }
 
-        return output
+  public signup = async (
+    input: SignupInputDTO
+  ): Promise<SignupOutputDTO> => {
+    const { id, name, email, password } = input
+
+    const userDBExists = await this.userDatabase.findUserById(id)
+
+    if (userDBExists) {
+      throw new BadRequestError("'id' já existe")
     }
 
-    public signup = async (input: SignupInput): Promise<SignupOutput> => {
-        const { id, name, email, password } = input
+    const newUser = new User(
+      id,
+      name,
+      email,
+      password,
+      USER_ROLES.NORMAL, // só é possível criar users com contas normais
+      new Date().toISOString()
+    )
 
-        if (typeof id !== "string") {
-            throw new BadRequestError("'id' deve ser string")
-        }
+    const newUserDB = newUser.toDBModel()
+    await this.userDatabase.insertUser(newUserDB)
 
-        if (typeof name !== "string") {
-            throw new BadRequestError("'name' deve ser string")
-        }
-
-        if (typeof email !== "string") {
-            throw new BadRequestError("'email' deve ser string")
-        }
-
-        if (typeof password !== "string") {
-            throw new BadRequestError("'password' deve ser string")
-        }
-
-        const userDBExists = await this.userDatabase.findUserById(id)
-
-        if (userDBExists) {
-            throw new BadRequestError("'id' já existe")
-        }
-
-        const newUser = new User(
-            id,
-            name,
-            email,
-            password,
-            USER_ROLES.NORMAL, // só é possível criar users com contas normais
-            new Date().toISOString()
-        )
-
-        const newUserDB = newUser.toDBModel()
-        await this.userDatabase.insertUser(newUserDB)
-
-        const output: SignupOutput = {
-            message: "Cadastro realizado com sucesso",
-            token: "token"
-        }
-
-        return output
+    const output: SignupOutputDTO = {
+      message: "Cadastro realizado com sucesso",
+      token: "token"
     }
 
-    public login = async (input: LoginInput): Promise<LoginOutput> => {
-        const { email, password } = input
+    return output
+  }
 
-        if (typeof email !== "string") {
-            throw new Error("'email' deve ser string")
-        }
+  public login = async (
+    input: LoginInputDTO
+  ): Promise<LoginOutputDTO> => {
+    const { email, password } = input
 
-        if (typeof password !== "string") {
-            throw new Error("'password' deve ser string")
-        }
+    const userDB = await this.userDatabase.findUserByEmail(email)
 
-        const userDB = await this.userDatabase.findUserByEmail(email)
-
-        if (!userDB) {
-            throw new NotFoundError("'email' não encontrado")
-        }
-
-        if (password !== userDB.password) {
-            throw new BadRequestError("'email' ou 'password' incorretos")
-        }
-
-        const output: LoginOutput = {
-            message: "Login realizado com sucesso",
-            token: "token"
-        }
-
-        return output
+    if (!userDB) {
+      throw new NotFoundError("'email' não encontrado")
     }
+
+    if (password !== userDB.password) {
+      throw new BadRequestError("'email' ou 'password' incorretos")
+    }
+
+    const output: LoginOutputDTO = {
+      message: "Login realizado com sucesso",
+      token: "token"
+    }
+
+    return output
+  }
 }

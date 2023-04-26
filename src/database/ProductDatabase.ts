@@ -1,36 +1,42 @@
-import { ProductDB } from "../types";
+import { ProductDB } from "../models/Product";
 import { BaseDatabase } from "./BaseDatabase";
 
 export class ProductDatabase extends BaseDatabase {
-    public static TABLE_PRODUCTS = "products"
+  public static TABLE_PRODUCTS = "products"
 
-    public async findProducts(q: string | undefined) {
-        if (q) {
-            const result: ProductDB[] = await BaseDatabase
-                .connection(ProductDatabase.TABLE_PRODUCTS)
-                .where("name", "LIKE", `%${q}%`)
+  public async findProducts(
+    q: string | undefined
+  ): Promise<ProductDB[]> {
+    if (q) {
+      const result: ProductDB[] = await BaseDatabase
+        .connection(ProductDatabase.TABLE_PRODUCTS)
+        .where("name", "LIKE", `%${q}%`)
 
-            return result
+      return result
 
-        } else {
-            const result: ProductDB[] = await BaseDatabase
-                .connection(ProductDatabase.TABLE_PRODUCTS)
+    } else {
+      const result: ProductDB[] = await BaseDatabase
+        .connection(ProductDatabase.TABLE_PRODUCTS)
 
-            return result
-        }
+      return result
     }
+  }
 
-    public async findProductById(id: string) {
-        const [ productDB ]: ProductDB[] | undefined[] = await BaseDatabase
-            .connection(ProductDatabase.TABLE_PRODUCTS)
-            .where({ id })
+  public async findProductById(
+    id: string
+  ): Promise<ProductDB | undefined> {
+    const [productDB]: ProductDB[] | undefined[] = await BaseDatabase
+      .connection(ProductDatabase.TABLE_PRODUCTS)
+      .where({ id })
 
-        return productDB
-    }
+    return productDB
+  }
 
-    public async insertProduct(newProductDB: ProductDB) {
-        await BaseDatabase
-            .connection(ProductDatabase.TABLE_PRODUCTS)
-            .insert(newProductDB)
-    }
+  public async insertProduct(
+    newProductDB: ProductDB
+  ): Promise<void> {
+    await BaseDatabase
+      .connection(ProductDatabase.TABLE_PRODUCTS)
+      .insert(newProductDB)
+  }
 }

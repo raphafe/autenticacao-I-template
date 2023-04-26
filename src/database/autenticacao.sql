@@ -1,4 +1,4 @@
--- Active: 1676287001787@@127.0.0.1@3306
+-- Active: 1682512904451@@127.0.0.1@3306
 CREATE TABLE users (
     id TEXT PRIMARY KEY UNIQUE NOT NULL,
     name TEXT NOT NULL,
@@ -10,9 +10,9 @@ CREATE TABLE users (
 
 INSERT INTO users (id, name, email, password, role)
 VALUES
-	("u001", "Fulano", "fulano@email.com", "fulano123", "NORMAL"),
-	("u002", "Beltrana", "beltrana@email.com", "beltrana00", "NORMAL"),
-	("u003", "Astrodev", "astrodev@email.com", "astrodev99", "ADMIN");
+	('u001', 'Fulano', 'fulano@email.com', 'fulano123', 'NORMAL'),
+	('u002', 'Beltrana', 'beltrana@email.com', 'beltrana00', 'NORMAL'),
+	('u003', 'Astrodev', 'astrodev@email.com', 'astrodev99', 'ADMIN');
 
 CREATE TABLE products (
     id TEXT PRIMARY KEY UNIQUE NOT NULL,
@@ -23,6 +23,6 @@ CREATE TABLE products (
 
 INSERT INTO products (id, name, price)
 VALUES
-	("p001", "Mouse", 50),
-	("p002", "Teclado", 80),
-	("p003", "Monitor", 700);
+	('p001', 'Mouse', 50),
+	('p002', 'Teclado', 80),
+	('p003', 'Monitor', 700);

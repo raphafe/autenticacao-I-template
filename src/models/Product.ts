@@ -1,4 +1,17 @@
-import { ProductDB, ProductModel } from "../types"
+export interface ProductDB {
+  id: string,
+  name: string,
+  price: number,
+  created_at: string
+}
+
+// é o modelo de Product que o front receberá (createdAt camelCase)
+export interface ProductModel {
+  id: string,
+  name: string,
+  price: number,
+  createdAt: string
+}
 
 export class Product {    
     constructor(
@@ -40,6 +53,7 @@ export class Product {
         this.createdAt = value
     }
 
+    // para facilitar nossa vida, temos o método que gera um ProductDB
     public toDBModel(): ProductDB {
         return {
             id: this.id,
@@ -49,6 +63,7 @@ export class Product {
         }
     }
 
+    // para facilitar nossa vida, temos o método que gera um ProductModel
     public toBusinessModel(): ProductModel {
         return {
             id: this.id,
