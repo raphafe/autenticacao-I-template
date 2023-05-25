@@ -36,7 +36,7 @@ export class ProductController {
     try {
 
       const input = CreateProductSchema.parse({
-        id: req.body.id,
+        //id: req.body.id,
         name: req.body.name,
         price: req.body.price
       })
